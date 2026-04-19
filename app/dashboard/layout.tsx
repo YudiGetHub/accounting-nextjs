@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 
 export default function DashboardLayout({
   children,
@@ -19,99 +19,56 @@ export default function DashboardLayout({
   }
 
   return (
-    <div style={{ minHeight: '100vh', position: 'relative' }}>
-
-      {/* Top Bar */}
+    <div style={{ minHeight: '100vh' }}>
+      
+      {/* Header */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px',
         background: '#111',
-        color: '#fff'
+        color: '#fff',
+        padding: '15px',
+        display: 'flex',
+        justifyContent: 'space-between'
       }}>
         <h2>Accounting</h2>
-        <button
-          onClick={() => setOpen(true)}
-          style={{
-            background: '#fff',
-            color: '#000',
-            padding: '6px 12px',
-            border: 'none'
-          }}
-        >
-          Menu
-        </button>
+        <button onClick={() => setOpen(true)}>Menu</button>
       </div>
 
-      {/* Sidebar Overlay */}
+      {/* Sidebar */}
       {open && (
-        <>
-          {/* Dark Overlay */}
-          <div
-            onClick={() => setOpen(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'rgba(0,0,0,0.4)',
-              zIndex: 998
-            }}
-          />
-
-          {/* Sidebar */}
-          <div style={{
+        <div
+          style={{
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '250px',
+            width: '220px',
             height: '100%',
             background: '#111',
             color: '#fff',
             padding: '20px',
-            zIndex: 999
-          }}>
-            <h3>Menu</h3>
-
-            <div style={{
-              marginTop: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              <Link href="/dashboard" style={{ color: '#fff' }} onClick={() => setOpen(false)}>
-                Dashboard
-              </Link>
-              <Link href="/dashboard/accounts" style={{ color: '#fff' }} onClick={() => setOpen(false)}>
-                Chart of Accounts
-              </Link>
-              <Link href="/dashboard/journal" style={{ color: '#fff' }} onClick={() => setOpen(false)}>
-                Journal
-              </Link>
-              <Link href="/dashboard/reports" style={{ color: '#fff' }} onClick={() => setOpen(false)}>
-                Reports
-              </Link>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              style={{
-                marginTop: '30px',
-                background: 'red',
-                color: 'white',
-                padding: '8px',
-                border: 'none'
-              }}
-            >
-              Logout
-            </button>
+            zIndex: 9999
+          }}
+        >
+          <div style={{ marginBottom: '20px' }}>
+            <button onClick={() => setOpen(false)}>Close</button>
           </div>
-        </>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
+            <Link href="/dashboard/accounts" onClick={() => setOpen(false)}>Accounts</Link>
+            <Link href="/dashboard/journal" onClick={() => setOpen(false)}>Journal</Link>
+            <Link href="/dashboard/reports" onClick={() => setOpen(false)}>Reports</Link>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            style={{ marginTop: '20px' }}
+          >
+            Logout
+          </button>
+        </div>
       )}
 
-      {/* Main Content */}
+      {/* Content */}
       <div style={{ padding: '20px' }}>
         {children}
       </div>
