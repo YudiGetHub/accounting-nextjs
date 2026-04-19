@@ -9,8 +9,9 @@ export default function AccountsPage() {
   const [name, setName] = useState('')
   const [category, setCategory] = useState('Asset')
   const [companyId, setCompanyId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  // Load Company
+  // ✅ Load Company ID
   useEffect(() => {
     const loadCompany = async () => {
       const { data: userData } = await supabase.auth.getUser()
@@ -30,37 +31,15 @@ export default function AccountsPage() {
     loadCompany()
   }, [])
 
-  // Load Accounts
+  // ✅ Load Accounts
   useEffect(() => {
     if (!companyId) return
-
-    const fetchAccounts = async () => {
-      const { data } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('code', { ascending: true })
-
-      if (data) setAccounts(data)
-    }
 
     fetchAccounts()
   }, [companyId])
 
-  const handleAddAccount = async () => {
+  const fetchAccounts = async () => {
     if (!companyId) return
-
-    await supabase.from('accounts').insert([
-      {
-        company_id: companyId,
-        code,
-        name,
-        category
-      }
-    ])
-
-    setCode('')
-    setName('')
 
     const { data } = await supabase
       .from('accounts')
@@ -71,41 +50,98 @@ export default function AccountsPage() {
     if (data) setAccounts(data)
   }
 
+  // ✅ Add Account
+  const handleAddAccount = async () => {
+    if (!companyId) {
+      alert("Company belum siap")
+      return
+    }
+
+    if (!code.trim() || !name.trim()) {
+      alert("Code dan Name wajib diisi")
+      return
+    }
+
+    setLoading(true)
+
+    const { error } = await supabase.from('accounts').insert([
+      {
+        company_id: companyId,
+        code: code.trim(),
+        name: name.trim(),
+        category
+      }
+    ])
+
+    setLoading(false)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    // Reset form
+    setCode('')
+    setName('')
+
+    await fetchAccounts()
+  }
+
   return (
     <div>
       <h1>Chart of Accounts</h1>
 
-      <div style={{ marginTop: '20px' }}>
+      {/* ✅ Form */}
+      <div style={{
+        marginTop: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        maxWidth: '400px'
+      }}>
         <input
-          placeholder="Account Code"
+          placeholder="Account Code (ex: 101)"
           value={code}
           onChange={(e) => setCode(e.target.value)}
         />
+
         <input
           placeholder="Account Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option>Asset</option>
-          <option>Liability</option>
-          <option>Equity</option>
-          <option>Revenue</option>
-          <option>Expense</option>
+          <option value="Asset">Asset</option>
+          <option value="Liability">Liability</option>
+          <option value="Equity">Equity</option>
+          <option value="Revenue">Revenue</option>
+          <option value="Expense">Expense</option>
         </select>
 
-        <button onClick={handleAddAccount}>
-          Add Account
+        <button
+          type="button"
+          onClick={handleAddAccount}
+          disabled={loading}
+          style={{
+            background: '#111',
+            color: '#fff',
+            padding: '8px',
+            border: 'none'
+          }}
+        >
+          {loading ? "Saving..." : "Add Account"}
         </button>
       </div>
 
+      {/* ✅ Table */}
       <div style={{ marginTop: '30px' }}>
         <h3>Account List</h3>
 
-        <table border={1} cellPadding={8}>
+        <table border={1} cellPadding={8} style={{ marginTop: '10px' }}>
           <thead>
             <tr>
               <th>Code</th>
